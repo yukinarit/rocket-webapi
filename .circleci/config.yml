@@ -1,0 +1,13 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: rust:latest
+    steps:
+      - checkout
+      - run:
+          name: Install nightly rust
+          command: rustup install nightly-2018-05-31 && rustup default nightly-2018-05-31
+      - run:
+          name: Build
+          command: cargo build
