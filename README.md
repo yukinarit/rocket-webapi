@@ -3,7 +3,7 @@ Making a RESTful JSON API with Rust and Rocket
 
 [English](README.md)
 
-Rocketは素晴らしいWebアプリケーションフレームワークで、サンプルコードも充実していますが、WebAPIサーバーを作る包括的なチュートリアルが無かったように思えたので、書いてみた。なお、このリポジトリコードはこの[記事](https://blog.miguelgrinberg.com/post/designing-a-restful-api-with-python-and-flask)を参考にしている。
+Rocketは素晴らしいWebアプリケーションフレームワークで、サンプルコードも充実していますが、WebAPIサーバーを作る包括的なチュートリアルが無かったように思えたので書いてみた。なお、このリポジトリコードはこの[記事](https://blog.miguelgrinberg.com/post/designing-a-restful-api-with-python-and-flask)を参考にしている。
 
 
 Table of Contents
@@ -23,11 +23,8 @@ Setup
 =====
 
 ```bash
-# Rustupをインストールする.
-$ curl https://sh.rustup.rs -sSf | sh
-
-# Rustのnightly版をインストールする。
-$ rustup toolchain install nightly
+# rustupをインストールする.
+$ curl https://sh.rustup.rs -sSf | /bin/bash -s -- -y --default-toolchain nightly
 ```
 
 Run
@@ -79,14 +76,12 @@ Tutorial
 なぜRustなのか？
 ----------------
 
-Rustは型安全でゼロコスト抽象化を実現したシステムプログラミング言語である。巷ではC言語の代替と言われることもあるが、実際使ってみるとより安全なC++としての趣きが強いと思 う。筆者は10年以上C++でMMOゲームや金融系のハイパフォーマンスサーバーを書いてきて、C++17とかModern CMakeとか、Rangeとかテンプレートプロぐラミングとかを色々追ってきましたがRustに出会ってからC++の最新を追うのをやめました。例えていうなら(まだない)C++23に安全性と最高のビルドシステムと最高のパッケージマネージャが付いてきた、みたいな感じです。それほどまでにRustは素晴らしい機能と言語としての表現力を持っている。
-
-Rustとそのエコシステムの中で好きな機能はproc macro、パターンマッチング、cargo、?オペレータ、イテレータ、Result、futures等たくさんあるけど、その辺りはまた別の機会に。
+Rustは型安全でゼロコスト抽象化を実現したシステムプログラミング言語である。巷ではC言語の代替と言われることもあるが、実際使ってみるとより安全なC++としての趣きが強いと思う。筆者は10年以上C++でMMOゲームや金融系のハイパフォーマンスサーバーを書いているが、C++17とかModern CMakeとか、Rangeとかテンプレートプログラミングとかを色々追ってきたが、Rustに出会ってからC++の最新を追うのをやめました。Rustを例えるなら(まだない)C++23に安全性と最高のビルドシステムと最高のパッケージマネージャが付いてきた、みたいな感じです。それほどまでにRustは素晴らしい機能と言語としての表現力を持っている。
 
 Rocketとは？
 -----------
 
-RocketはRustで書かれたタイプセーフなマイクロウェブアプリケーションフレームワーク。Rocketのミニマムなデザインは特にURLルーティング等、FlaskというPythonの有名なマイクロウェブアプリケーションフレームワークに似ている(と思う)。シンプルなTODOアプリのWebAPIサーバーを作ってみて、Rocketの使い方を解説してみる。
+RocketはRustで書かれたタイプセーフなマイクロウェブアプリケーションフレームワークである。Rocketのミニマムで柔軟性のあるデザインはPythonのFlaskに似ている(と思う)。それでは、シンプルなTODOアプリのWebAPIサーバーを作ってみて、Rocketの使い方を解説してみる。
 
 Hello Rocket!
 -------------
@@ -94,7 +89,7 @@ Hello Rocket!
 まずは、Hello, worldを返すだけのアプリを作ってみる。
 
 * プロジェクト作成
-	```
+	```bash
 	$ cargo new rocket-webapi
 	$ cd rocket-webapi
 	```
@@ -111,7 +106,11 @@ Hello Rocket!
 	rocket_contrib = { version = "0.3.12", features = ["json"] }
 	```
 
-**最新版RocketはNightly Rustのバージョンによってはコンパイルできないかもしれません。その場合はv0.3.0を使ってみてください**
+**rustcのバージョンによってはコンパイルできないかもしれません。その場合はいかを実行して再ビルドしてみてください**
+
+```bash
+rustup update
+```
 　
 * src/main.rs
 
@@ -130,7 +129,7 @@ fn index() -> &'static str {
 
 fn main() {
     rocket::ignite()
-        .mount("/", routes![index])  // ここがルーティングをセットする
+        .mount("/", routes![index])  // ここにルーティングをセットする
         .launch();
 }
 ```
@@ -138,15 +137,11 @@ fn main() {
 実行してみる。
 
 ```bash
-$ cargo +nightly run
-
-# nightly-2018-05-31をデフォルトにしたい場合は
-$ rustup default nightly
 $ cargo run
 ```
 
 ```bash
-$ cargo +nightly run
+$ cargo run
 
 
 🔧  Configured for development.
@@ -229,7 +224,7 @@ ToDOアプリのWebAPIをつくる
 	}
 	
 	/// TODOリストを返す。
-	/// Jsonの型がResponderをimplしているので、JSONを返している
+	/// Jsonの型がResponderをimplしているので、JSON文字列を返すことができる
 	#[get("/todos")]
 	fn todos() -> Json<Vec<ToDo>> {
 	    Json(vec![ToDo {
@@ -276,7 +271,7 @@ ToDOアプリのWebAPIをつくる
 実行してみる。
 
 ```bash
-$ cargo +nightly run
+$ cargo run
 
 🔧  Configured for development.
     => address: localhost
@@ -331,7 +326,7 @@ Responder
 
 上記の例でJson型の戻り値を返すとJSONの文字列がレスポンスとして返った。この仕組みを実現いているのがResponderトレイトだ。Rocketのルーティングの関数はすべてResponderトレイトをimplしなければならない。
 
-難しそうい聞こえるが実際には、Rocketがいろいろな型のResponderトレイトをあらかじめimplしといてくれるので、自分でimplする場面は意外に少ないかもしれない。以下に主なResponderのimplを示す。
+難しそうい聞こえるが、実際にはRocketがいろいろな型のResponderトレイトをあらかじめimplしといてくれるので、自分でimplする場面は意外に少ないかもしれない。以下に主なResponderのimplを示す。
 
 | 型                         | レスポンス               |
 | -------------------------- | ------------------------ |
