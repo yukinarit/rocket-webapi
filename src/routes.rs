@@ -4,7 +4,7 @@ use rocket::response::status::Accepted;
 use rocket::response::{Responder, Response};
 use rocket_contrib::json::Json;
 
-use models::ToDo;
+use crate::models::ToDo;
 
 #[get("/")]
 pub fn index() -> &'static str {
