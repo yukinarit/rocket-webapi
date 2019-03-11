@@ -3,7 +3,7 @@ Making a RESTful JSON API with Rust and Rocket
 
 [English](README.md)
 
-Rocketは素晴らしいWebアプリケーションフレームワークで、サンプルコードも充実していますが、WebAPIサーバーを作る包括的なチュートリアルが無かったように思えたので書いてみた。なお、このリポジトリコードはこの[記事](https://blog.miguelgrinberg.com/post/designing-a-restful-api-with-python-and-flask)を参考にしている。
+Rocketは素晴らしいWebアプリケーションフレームワークで、サンプルコードも充実しているけど、WebAPIサーバーを作る包括的なチュートリアルが無かったように思えたので書いてみることにする。なお、このリポジトリコードはこの[記事](https://blog.miguelgrinberg.com/post/designing-a-restful-api-with-python-and-flask)を参考にしている。
 
 
 Table of Contents
@@ -32,7 +32,7 @@ Run
 
 ```bash
 $ cd rocket-webapi
-$ cargo +nightly run
+$ cargo run
 
 
 🔧  Configured for development.
@@ -76,12 +76,12 @@ Tutorial
 なぜRustなのか？
 ----------------
 
-Rustは型安全でゼロコスト抽象化を実現したシステムプログラミング言語である。巷ではC言語の代替と言われることもあるが、実際使ってみるとより安全なC++としての趣きが強いと思う。筆者は10年以上C++でMMOゲームや金融系のハイパフォーマンスサーバーを書いているが、C++17とかModern CMakeとか、Rangeとかテンプレートプログラミングとかを色々追ってきたが、Rustに出会ってからC++の最新を追うのをやめました。Rustを例えるなら(まだない)C++23に安全性と最高のビルドシステムと最高のパッケージマネージャが付いてきた、みたいな感じです。それほどまでにRustは素晴らしい機能と言語としての表現力を持っている。
+Rustは型安全でゼロコスト抽象化を実現したシステムプログラミング言語だ。巷ではC言語の代替と言われることもあるが、実際使ってみるとより安全なC++としての趣きが強いと思う。筆者は10年以上C++でMMOゲームや金融系のハイパフォーマンスサーバーを書いてきて、C++17とかModern CMakeとか、Rangeとかテンプレートプログラミングとかを色々追ってきたが、Rustに出会ってからC++の最新を追うのをやめた。Rustは例えるなら(まだない)C++23に安全性とSaneなメタプロシステムと最高のビルドシステムと最高のパッケージマネージャが付いてきた、みたいな感じ。それほどまでにRustは素晴らしい機能と言語としての表現力を持っている(と思う)。
 
 Rocketとは？
 -----------
 
-RocketはRustで書かれたタイプセーフなマイクロウェブアプリケーションフレームワークである。Rocketのミニマムで柔軟性のあるデザインはPythonのFlaskに似ている(と思う)。それでは、シンプルなTODOアプリのWebAPIサーバーを作ってみて、Rocketの使い方を解説してみる。
+RocketはRustで書かれたタイプセーフなマイクロウェブアプリケーションフレームワークで、PythonのFlaskに似ている感じ。それでは、シンプルなTODOアプリのWebAPIサーバーを作ってみて、Rocketの使い方を解説してみる。
 
 Hello Rocket!
 -------------
@@ -94,6 +94,11 @@ Hello Rocket!
 	$ cd rocket-webapi
 	```
 
+* rust-toolchain
+	```
+	nightly
+	```
+
 * Cargo.toml
 	```
 	[package]
@@ -101,44 +106,32 @@ Hello Rocket!
 	version = "0.1.0"
 	
 	[dependencies]
-	rocket = "0.3.12"
-	rocket_codegen = "0.3.12"
-	rocket_contrib = { version = "0.3.12", features = ["json"] }
+	rocket = "0.4"
+	rocket_contrib = { version = "0.4", features = ["json"] }
 	```
 
-**rustcのバージョンによってはコンパイルできないかもしれません。その場合はいかを実行して再ビルドしてみてください**
-
-```bash
-rustup update
-```
-　
 * src/main.rs
-
-
-```rust
-#![feature(plugin)]
-#![plugin(rocket_codegen)]
-
-extern crate rocket;
-
-/// GETがきたときに"Hello, world!"というレスポンスを返す
-#[get("/")]
-fn index() -> &'static str {
-    "Hello, world!"
-}
-
-fn main() {
-    rocket::ignite()
-        .mount("/", routes![index])  // ここにルーティングをセットする
-        .launch();
-}
-```
+	```rust
+	#![feature(proc_macro_hygiene)]
+	#![feature(decl_macro)]
+	
+	#[macro_use]
+	extern crate rocket;
+	
+	/// GETがきたときに"Hello, world!"というレスポンスを返す
+	#[get("/")]
+	fn index() -> &'static str {
+	    "Hello, world!"
+	}
+	
+	fn main() {
+	    rocket::ignite()
+	        .mount("/", routes![index])  // ここにルーティングをセットする
+	        .launch();
+	}
+	```
 
 実行してみる。
-
-```bash
-$ cargo run
-```
 
 ```bash
 $ cargo run
@@ -164,6 +157,13 @@ Hello, world!
 
 動いた！ ＼(^o^)／
 
+ここでコンパイルエラーが出た人は、以下を試してみてほしい
+
+```
+# Rust toolchainを更新する
+rustup update
+```
+
 ToDOアプリのWebAPIをつくる
 --------------------------
 
@@ -176,32 +176,25 @@ ToDOアプリのWebAPIをつくる
 	version = "0.1.0"
 	
 	[dependencies]
-	rocket = "=0.3.12"
-	rocket_codegen = "=0.3.12"
-	rocket_contrib = { version = "=0.3.12", features = ["json"] }
+	rocket = "0.4"
+	rocket_contrib = { version = "0.4", features = ["json"] }
 	# serdeのcrateを追加する
-	serde = "1.0.0"
-	serde_json = "1.0.0"
-	serde_derive = "1.0.0"
+    serde = { version = "1.0", features = ["derive"] }
+    serde_json = "1.0.0"
 	```
 
 * main.rs 
 	```rust
-	#![feature(plugin)]
-	#![plugin(rocket_codegen)]
+	#![feature(proc_macro_hygiene)]
+	#![feature(decl_macro)]
 	
+	#[macro_use]
 	extern crate rocket;
-	#[macro_use]
-	extern crate rocket_contrib;
-	extern crate serde;
-	#[macro_use]
-	extern crate serde_derive;
-	extern crate chrono;
 	
 	mod models;
 	mod routes;
 	
-	# WebAPIのURLルーティングはroutes.rsに移動する
+	// WebAPIのURLルーティングはroutes.rsに移動する
 	use routes::*;
 	
 	fn main() {
@@ -214,19 +207,19 @@ ToDOアプリのWebAPIをつくる
 * routes.rs
 	```rust
 	// JSONを返すのに必要
-	use rocket_contrib::Json;
+    use rocket_contrib::json::Json;
 	
-	use models::ToDo;
+	use crate::models::ToDo;
 	
 	#[get("/")]
-	fn index() -> &'static str {
+	pub fn index() -> &'static str {
 	    "Hello, world!"
 	}
 	
 	/// TODOリストを返す。
 	/// Jsonの型がResponderをimplしているので、JSON文字列を返すことができる
 	#[get("/todos")]
-	fn todos() -> Json<Vec<ToDo>> {
+	pub fn todos() -> Json<Vec<ToDo>> {
 	    Json(vec![ToDo {
 	        id: 1,
 	        title: "Read Rocket tutorial".into(),
@@ -238,14 +231,14 @@ ToDOアプリのWebAPIをつくる
 	/// 新しいTODOを作成する
 	/// POSTの時はこうする
 	#[post("/todos", data = "<todo>")]
-	fn new_todo(todo: Json<ToDo>) -> String {
+	pub fn new_todo(todo: Json<ToDo>) -> String {
 	    format!("Accepted post request! {:?}", todo.0)
 	}
 	
 	
 	/// TODOを取得する
 	#[get("/todos/<todoid>")]
-	fn todo_by_id(todoid: u32) -> String {
+	pub fn todo_by_id(todoid: u32) -> String {
 	    let todo = ToDo {
 	        id: 1,
 	        title: "Read Rocket tutorial".into(),
@@ -258,6 +251,8 @@ ToDOアプリのWebAPIをつくる
 
 * models.rs
 	```rust
+    use serde::{Deserialize, Serialize};
+
 	/// TODOのモデルはmodels.rsに定義
 	#[derive(Debug, Serialize, Deserialize)]
 	pub struct ToDo {
@@ -319,7 +314,7 @@ Date: Thu, 05 Jul 2018 03:55:22 GMT
 Accepted post request! ToDo { id: 100, title: "Read this book", description: "http://shop.oreilly.com/product/0636920040385.do", done: false }
 ```
 
-POSTも大丈夫ですね。
+POSTもOK。
 
 Responder
 ---------
@@ -328,17 +323,17 @@ Responder
 
 難しそうい聞こえるが、実際にはRocketがいろいろな型のResponderトレイトをあらかじめimplしといてくれるので、自分でimplする場面は意外に少ないかもしれない。以下に主なResponderのimplを示す。
 
-| 型                         | レスポンス               |
-| -------------------------- | ------------------------ |
-| &'static str, &str, String | text/plainの文字列が返る |
-| NamedFile                  | ファイルの中身おの文字列が返る |
-| Redirect                   | 別のURLにリダイレクトする |
-| Stream                     | HTTPストリーミングレスポンスが返る |
-| Json                       | application/jsonのJSON文字列が返る |
-| Template                   | Templateをレンダリングした結果が返る |
+| 型                         | レスポンス                                     |
+| -------------------------- | ---------------------------------------------- |
+| &'static str, &str, String | text/plainの文字列が返る                       |
+| NamedFile                  | ファイルの文字列が返る                         |
+| Redirect                   | 別のURLにリダイレクトする                      |
+| Stream                     | HTTPストリーミングレスポンスが返る             |
+| Json                       | application/jsonのJSON文字列が返る             |
+| Template                   | Templateをレンダリングした結果が返る           |
 | rocket::response::statusにある型 | 例えばAcceptedの場合あ203 Acceptedになる |
-| Option<T> | Some(T)の場合はTのResponder、Noneの場合は404 Not Foundになる |
-| Result<T,E> | Ok(T)の場合はT、Err(E)の場合はUのResponderの結果が返る |
+| Option<T> | Some(T)の場合はTのResponder、Noneの場合は404 Not Foundになる    |
+| Result<T,E> | Ok(T)の場合はT、Err(E)の場合はUのResponderの結果が返る        |
 
 最後の3つはWrapping Responderと言われておりWrapした中身のResponderの結果を装飾したり、中身の型によって動きを動的に返る役割を持つ。
 
